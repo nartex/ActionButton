@@ -46,7 +46,7 @@ public class ActionButton: NSObject {
     private(set) public var active: Bool = false
     
     /// An array of items that the button will present
-    internal var items: [ActionButtonItem]? {
+    public var items: [ActionButtonItem]? {
         willSet {
             for abi in self.items! {
                 abi.view.removeFromSuperview()
