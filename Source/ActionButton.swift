@@ -61,6 +61,14 @@ public class ActionButton: NSObject {
     /// The button that will be presented to the user
     private var floatButton: UIButton!
     
+    /// Wether the float button should be hidden or not
+    private var hidden: Bool = false {
+        didSet {
+            self.floatButton.hidden = self.hidden;
+        }
+    }
+    
+    
     /// View that will hold the placement of the button's actions
     private var contentView: UIView!
     
