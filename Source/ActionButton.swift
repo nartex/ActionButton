@@ -30,7 +30,7 @@ public class ActionButton: NSObject {
     
     /// The action the button should perform when tapped
     private var action: ActionButtonAction?
-
+    
     /// The button's background color : set default color and selected color
     public var backgroundColor: UIColor = UIColor(red: 238.0/255.0, green: 130.0/255.0, blue: 34.0/255.0, alpha:1.0) {
         willSet {
@@ -62,7 +62,7 @@ public class ActionButton: NSObject {
     private var floatButton: UIButton!
     
     /// Wether the float button should be hidden or not
-    private var hidden: Bool = false {
+    public var hidden: Bool = false {
         didSet {
             self.floatButton.hidden = self.hidden;
         }
@@ -76,7 +76,7 @@ public class ActionButton: NSObject {
     private var parentView: UIView!
     
     /// Blur effect that will be presented when the button is active
-    private var blurVisualEffect: UIVisualEffectView!
+    private var blurVisualEffectView: UIVisualEffectView!
     
     // Distance between each item action
     private let itemOffset = -55
@@ -113,11 +113,16 @@ public class ActionButton: NSObject {
         self.floatButton.addTarget(self, action: Selector("buttonTapped:"), forControlEvents: .TouchUpInside)
         self.floatButton.addTarget(self, action: Selector("buttonTouchDown:"), forControlEvents: .TouchDown)
         self.parentView.addSubview(self.floatButton)
-
+        
         self.contentView = UIView(frame: bounds)
-        self.blurVisualEffect = UIVisualEffectView(effect: UIBlurEffect(style: .ExtraLight))
-        self.blurVisualEffect.frame = self.contentView.frame
-        self.contentView.addSubview(self.blurVisualEffect)
+        self.contentView.autoresizingMask = [.FlexibleHeight, .FlexibleWidth]
+        self.contentView.opaque = false
+        self.contentView.backgroundColor = UIColor.clearColor()
+        
+        self.blurVisualEffectView = UIVisualEffectView(effect: UIBlurEffect(style: .Dark))
+        self.blurVisualEffectView.alpha = 0.0
+        self.blurVisualEffectView.frame = self.contentView.frame
+        self.blurVisualEffectView.autoresizingMask = [.FlexibleHeight, .FlexibleWidth]
         
         let tap = UITapGestureRecognizer(target: self, action: Selector("backgroundTapped:"))
         self.contentView.addGestureRecognizer(tap)
@@ -147,7 +152,7 @@ public class ActionButton: NSObject {
     
     //MARK: - Auto Layout Methods
     /**
-        Install all the necessary constraints for the button. By the default the button will be placed at 15pts from the bottom and the 15pts from the right of its *parentView*
+    Install all the necessary constraints for the button. By the default the button will be placed at 15pts from the bottom and the 15pts from the right of its *parentView*
     */
     private func installConstraints() {
         let views = ["floatButton":self.floatButton, "parentView":self.parentView]
@@ -184,7 +189,7 @@ public class ActionButton: NSObject {
     
     //MARK: - Custom Methods
     /**
-        Presents or hides all the ActionButton's actions
+    Presents or hides all the ActionButton's actions
     */
     public func toggleMenu() {
         self.placeButtonItems()
@@ -193,13 +198,14 @@ public class ActionButton: NSObject {
     
     //MARK: - Action Button Items Placement
     /**
-        Defines the position of all the ActionButton's actions
+    Defines the position of all the ActionButton's actions
     */
     private func placeButtonItems() {
         if let optionalItems = self.items {
             for item in optionalItems {
-                item.view.center = CGPoint(x: self.floatButton.center.x - 83, y: self.floatButton.center.y)
+                item.view.center = CGPoint(x: self.floatButton.center.x - 123, y: self.floatButton.center.y)
                 item.view.removeFromSuperview()
+                item.view.autoresizingMask = [.FlexibleLeftMargin, .FlexibleTopMargin]
                 
                 self.contentView.addSubview(item.view)
             }
@@ -208,7 +214,7 @@ public class ActionButton: NSObject {
     
     //MARK - Float Menu Methods
     /**
-        Presents or hides all the ActionButton's actions and changes the *active* state
+    Presents or hides all the ActionButton's actions and changes the *active* state
     */
     private func toggle() {
         self.animateMenu()
@@ -220,19 +226,27 @@ public class ActionButton: NSObject {
     }
     
     private func animateMenu() {
-        let rotation = self.active ? 0 : CGFloat(M_PI_4)
+        let rotation = self.active ? CGFloat(-M_PI_4 / 2.0) : CGFloat(M_PI_4 + (M_PI_4 / 2.0))
         
-        UIView.animateWithDuration(0.3, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0.1, options: UIViewAnimationOptions.AllowAnimatedContent, animations: {
+        UIView.animateWithDuration(0.2, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0.1, options: [UIViewAnimationOptions.AllowAnimatedContent, UIViewAnimationOptions.CurveEaseInOut], animations: {
             
             if self.floatButton.currentTitle == "+" && self.floatButton.imageView?.image == nil {
                 self.floatButton.transform = CGAffineTransformMakeRotation(rotation)
             }
-    
+            
             self.showActive(false)
-        }, completion: {completed in
-            if self.active == false {
-                self.hideBlur()
-            }
+            }, completion: {completed in
+                UIView.animateWithDuration(0.08, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0.1, options: [UIViewAnimationOptions.AllowAnimatedContent , UIViewAnimationOptions.CurveEaseInOut], animations: {
+                    
+                    if self.floatButton.currentTitle == "+" && self.floatButton.imageView?.image == nil {
+                        self.floatButton.transform = CGAffineTransformMakeRotation(self.active ? CGFloat(M_PI_4) : CGFloat(0))
+                    }
+                    
+                    }, completion: {completed in
+                        if self.active == false {
+                            self.hideBlur()
+                        }
+                })
         })
     }
     
@@ -261,21 +275,30 @@ public class ActionButton: NSObject {
     }
     
     private func showBlur() {
+        //self.contentView.frame = CGRectMake(self.contentView.frame.origin.x, self.contentView.frame.origin.y, self.parentView.frame.size.width, self.parentView.frame.size.height)
+        self.blurVisualEffectView.frame = CGRectMake(self.contentView.frame.origin.x, self.contentView.frame.origin.y, self.parentView.frame.size.width, self.parentView.frame.size.height)
+        
         self.parentView.insertSubview(self.contentView, belowSubview: self.floatButton)
+        self.parentView.insertSubview(self.blurVisualEffectView, belowSubview: self.contentView)
+        UIView.animateWithDuration(0.2) { () -> Void in
+            self.blurVisualEffectView.alpha = 0.95
+        }
     }
     
     private func hideBlur() {
+        self.blurVisualEffectView.removeFromSuperview()
         self.contentView.removeFromSuperview()
+        self.blurVisualEffectView.alpha = 0.0
     }
     
     /**
-        Animates the button pressing, by the default this method just scales the button down when it's pressed and returns to its normal size when the button is no longer pressed
+    Animates the button pressing, by the default this method just scales the button down when it's pressed and returns to its normal size when the button is no longer pressed
     
-        - parameter scale: how much the button should be scaled
+    - parameter scale: how much the button should be scaled
     */
     private func animatePressingWithScale(scale: CGFloat) {
         UIView.animateWithDuration(0.2, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0.1, options: UIViewAnimationOptions.AllowAnimatedContent, animations: {
             self.floatButton.transform = CGAffineTransformMakeScale(scale, scale)
-        }, completion: nil)
+            }, completion: nil)
     }
 }
