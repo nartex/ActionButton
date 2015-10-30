@@ -39,7 +39,6 @@ public class ActionButtonItem: NSObject {
         
         set {
             self.label.text = newValue
-            self.label.sizeToFit()
         }
     }
     /// View that will hold the item's button and label
@@ -63,7 +62,7 @@ public class ActionButtonItem: NSObject {
     }
     
     /// Size needed for the *view* property presente the item's content
-    private let viewSize = CGSize(width: 280, height: 35)
+    private let viewSize = CGSize(width: 300, height: 35)
     
     /// Button's size by default the button is 35x35
     private let buttonSize = CGSize(width: 35, height: 35)
@@ -99,7 +98,7 @@ public class ActionButtonItem: NSObject {
         }
                 
         if let text = optionalTitle where text.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()).isEmpty == false {
-            self.label = UILabel()
+            self.label = UILabel(frame: CGRectMake(0, 0, self.viewSize.width, self.viewSize.height))
             self.label.font = UIFont(name: "HelveticaNeue-Medium", size: 13)
             self.label.textColor = UIColor.whiteColor()
             self.label.textAlignment = .Right
@@ -108,8 +107,7 @@ public class ActionButtonItem: NSObject {
             self.label.lineBreakMode = .ByWordWrapping
             self.label.minimumScaleFactor = 0.2
             self.label.addGestureRecognizer(UITapGestureRecognizer(target: self, action: Selector("labelTapped:")))
-            self.label.sizeToFit()
-            self.label.frame = CGRectMake(self.label.frame.origin.x, self.label.frame.origin.y, self.label.frame.size.width, self.buttonSize.height)
+//            self.label.frame = CGRectMake(0, self.label.frame.origin.y, self.label.frame.size.width, self.buttonSize.height)
             
             self.labelBackground = UIView()
             self.labelBackground.frame = self.label.frame
@@ -127,7 +125,7 @@ public class ActionButtonItem: NSObject {
             self.label.frame.origin.y = self.label.frame.origin.y + backgroundInset.height / 2
             
             // Adjust label's background position
-            self.labelBackground.frame.origin.x = CGFloat(210 - self.label.frame.size.width)
+            self.labelBackground.frame.origin.x = CGFloat(230 - self.label.frame.size.width)
             self.labelBackground.center.y = self.view.center.y
             self.labelBackground.addSubview(self.label)
             
