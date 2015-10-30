@@ -203,7 +203,7 @@ public class ActionButton: NSObject {
     private func placeButtonItems() {
         if let optionalItems = self.items {
             for item in optionalItems {
-                item.view.center = CGPoint(x: self.floatButton.center.x - 123, y: self.floatButton.center.y)
+                item.view.center = CGPoint(x: self.floatButton.center.x - 133, y: self.floatButton.center.y)
                 item.view.removeFromSuperview()
                 item.view.autoresizingMask = [.FlexibleLeftMargin, .FlexibleTopMargin]
                 
@@ -218,9 +218,13 @@ public class ActionButton: NSObject {
     */
     private func toggle() {
         self.animateMenu()
-        self.showBlur()
         
         self.active = !self.active
+        
+        if (self.active) {
+            self.showBlur()
+        }
+        
         self.floatButton.backgroundColor = self.active ? backgroundColorSelected : backgroundColor
         self.floatButton.selected = self.active
     }
@@ -235,17 +239,25 @@ public class ActionButton: NSObject {
             }
             
             self.showActive(false)
-            }, completion: {completed in
+            
+            if self.active {
+                self.blurVisualEffectView.alpha = 0.0
+            }
+            
+            }, completion: { completed in
                 UIView.animateWithDuration(0.08, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0.1, options: [UIViewAnimationOptions.AllowAnimatedContent , UIViewAnimationOptions.CurveEaseInOut], animations: {
                     
                     if self.floatButton.currentTitle == "+" && self.floatButton.imageView?.image == nil {
                         self.floatButton.transform = CGAffineTransformMakeRotation(self.active ? CGFloat(M_PI_4) : CGFloat(0))
                     }
                     
-                    }, completion: {completed in
-                        if self.active == false {
-                            self.hideBlur()
-                        }
+                    if (!self.active) {
+                        self.blurVisualEffectView.removeFromSuperview()
+                        self.contentView.removeFromSuperview()
+                    }
+                    
+                    }, completion: {
+                        completed in
                 })
         })
     }
@@ -283,12 +295,6 @@ public class ActionButton: NSObject {
         UIView.animateWithDuration(0.2) { () -> Void in
             self.blurVisualEffectView.alpha = 0.95
         }
-    }
-    
-    private func hideBlur() {
-        self.blurVisualEffectView.removeFromSuperview()
-        self.contentView.removeFromSuperview()
-        self.blurVisualEffectView.alpha = 0.0
     }
     
     /**
