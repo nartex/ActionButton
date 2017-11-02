@@ -77,13 +77,13 @@ public typealias ActionButtonAction = (ActionButton) -> Void
             }
         }
         didSet {
-            placeButtonItems()
+            //placeButtonItems()
             showActive(true)
         }
     }
 
     /// The button that will be presented to the user
-    fileprivate var floatButton: UIButton!
+    @objc public var floatButton: UIButton!
 
     /// Wether the float button should be hidden or not
     @objc open var hidden: Bool = false {
@@ -225,6 +225,7 @@ public typealias ActionButtonAction = (ActionButton) -> Void
      Defines the position of all the ActionButton's actions
      */
     fileprivate func placeButtonItems() {
+        self.contentView.frame = self.parentView.bounds
         if let optionalItems = self.items {
             for item in optionalItems {
                 item.view.center = CGPoint(x: self.floatButton.center.x - 133, y: self.floatButton.center.y)
@@ -314,7 +315,6 @@ public typealias ActionButtonAction = (ActionButton) -> Void
     fileprivate func showBlur() {
         //self.contentView.frame = CGRectMake(self.contentView.frame.origin.x, self.contentView.frame.origin.y, self.parentView.frame.size.width, self.parentView.frame.size.height)
         self.blurVisualEffectView.frame = CGRect(x: self.contentView.frame.origin.x, y: self.contentView.frame.origin.y, width: self.parentView.frame.size.width, height: self.parentView.frame.size.height)
-
         self.parentView.insertSubview(self.contentView, belowSubview: self.floatButton)
         self.parentView.insertSubview(self.blurVisualEffectView, belowSubview: self.contentView)
         UIView.animate(withDuration: 0.2, animations: { () -> Void in
